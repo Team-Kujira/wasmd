@@ -447,16 +447,21 @@ func (k Keeper) migrate(ctx sdk.Context, contractAddress sdk.AccAddress, caller 
 	if contractInfo == nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "unknown contract")
 	}
-	if !authZ.CanModifyContract(contractInfo.AdminAddr(), caller) {
-		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not migrate")
-	}
 
 	newCodeInfo := k.GetCodeInfo(ctx, newCodeID)
 	if newCodeInfo == nil {
 		return nil, sdkerrors.Wrap(sdkerrors.ErrInvalidRequest, "unknown code")
 	}
 
-	if !authZ.CanInstantiateContract(newCodeInfo.InstantiateConfig, caller) {
+	if !authZ.CanMigrateContract(newCodeInfo.InstantiateConfig, caller) {
+		// We only want to check for "owner" migration permissions if the keeper
+		// params don't blanket allow the migration. Keeper permissions should
+		// allow this account to migrate contracts regardless of contract admin,
+		// as they should be set to some kind of trusted multisig
+		if !authZ.CanModifyContract(contractInfo.AdminAddr(), caller) {
+			return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "can not migrate")
+		}
+
 		return nil, sdkerrors.Wrap(sdkerrors.ErrUnauthorized, "to use new code")
 	}
 

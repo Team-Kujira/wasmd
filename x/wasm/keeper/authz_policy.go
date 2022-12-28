@@ -9,6 +9,7 @@ import (
 type AuthorizationPolicy interface {
 	CanCreateCode(c types.AccessConfig, creator sdk.AccAddress) bool
 	CanInstantiateContract(c types.AccessConfig, actor sdk.AccAddress) bool
+	CanMigrateContract(c types.AccessConfig, actor sdk.AccAddress) bool
 	CanModifyContract(admin, actor sdk.AccAddress) bool
 	CanModifyCodeAccessConfig(creator, actor sdk.AccAddress, isSubset bool) bool
 }
@@ -20,6 +21,10 @@ func (p DefaultAuthorizationPolicy) CanCreateCode(config types.AccessConfig, act
 }
 
 func (p DefaultAuthorizationPolicy) CanInstantiateContract(config types.AccessConfig, actor sdk.AccAddress) bool {
+	return config.Allowed(actor)
+}
+
+func (p DefaultAuthorizationPolicy) CanMigrateContract(config types.AccessConfig, actor sdk.AccAddress) bool {
 	return config.Allowed(actor)
 }
 
@@ -39,6 +44,10 @@ func (p GovAuthorizationPolicy) CanCreateCode(types.AccessConfig, sdk.AccAddress
 
 func (p GovAuthorizationPolicy) CanInstantiateContract(types.AccessConfig, sdk.AccAddress) bool {
 	return true
+}
+
+func (p GovAuthorizationPolicy) CanMigrateContract(types.AccessConfig, sdk.AccAddress) bool {
+	return false
 }
 
 func (p GovAuthorizationPolicy) CanModifyContract(sdk.AccAddress, sdk.AccAddress) bool {

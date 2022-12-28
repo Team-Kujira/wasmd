@@ -15,6 +15,7 @@ import (
 var (
 	ParamStoreKeyUploadAccess      = []byte("uploadAccess")
 	ParamStoreKeyInstantiateAccess = []byte("instantiateAccess")
+	ParamStoreKeyMigrateAccess     = []byte("migrateAccess")
 )
 
 var AllAccessTypes = []AccessType{
